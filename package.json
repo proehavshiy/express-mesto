@@ -4,20 +4,29 @@
   "description": "## Директории",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon app.js",
+    "start": "node app.js",
+    "lint": "npx eslint ."
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/proehavshiy/express-mesto.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Egor Kurkin",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/proehavshiy/express-mesto/issues"
   },
   "homepage": "https://github.com/proehavshiy/express-mesto#readme",
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "mongoose": "^5.13.3"
+  },
+  "devDependencies": {
+    "eslint": "^7.31.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.23.4",
+    "nodemon": "^2.0.12"
   }
 }
