@@ -2,13 +2,16 @@ const usersRouter = require('express').Router();
 
 // import controllers
 const {
-  doesUserExist,
   getUsers,
   getUser,
   postUser,
   updateUser,
   updateAvatar,
 } = require('../controllers/users');
+// import middlewares
+const {
+  doesUserExist,
+} = require('../middlewares/middlewares');
 
 usersRouter.get('/', getUsers);
 

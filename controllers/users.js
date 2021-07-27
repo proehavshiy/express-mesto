@@ -2,15 +2,6 @@ function getUsers(req, res, next) {
   res.status(200).send('возвращает всех пользователей');
 }
 
-// проверочный мидлвар
-function doesUserExist(req, res, next) {
-  const { userId } = req.params;
-  if (userId === 'error') { // потом написать более нормальную проверку по базе
-    res.send({ error: 'Такого пользователя нет' });
-  }
-  next();
-}
-
 function getUser(req, res, next) {
   const { userId } = req.params;
   res.status(200).send(`возвращает пользователя по userId: ${userId}`);
@@ -32,7 +23,6 @@ function updateAvatar(req, res, next) {
 }
 
 module.exports = {
-  doesUserExist,
   getUsers,
   getUser,
   postUser,

@@ -7,7 +7,10 @@ const app = express();
 const bodyParser = require('body-parser');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
+const { setCors } = require('./middlewares/middlewares');
 
+// мидлвара управления CORS
+app.use(setCors);
 // мидлвара для собирания тела request JSON-формата
 app.use(bodyParser.json());
 // роут users
