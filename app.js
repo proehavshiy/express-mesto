@@ -30,7 +30,7 @@ app.use(bodyParser.json());
 // временная мидлвара - хардкод юзера
 app.use('/', (req, res, next) => {
   req.user = {
-    _id: '61013e4c33a8653daab022f7',
+    _id: '61013e4c33a8653daab022f6', // '61013e4c33a8653daab022f7'
   };
   next();
 });

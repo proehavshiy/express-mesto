@@ -41,8 +41,8 @@ function putCardLike(req, res) {
 
 function deleteCardLike(req, res) {
   const { cardId } = req.params;
-  const { _id } = req.user; // захардкоженый id юзера
-  const card = Card.findById(cardId);
+  const { _id } = req.user; // захардкоженый id
+  const card = Card.findById(cardId)
   // console.log('card:', card);
   if (card) {
     console.log('карточка найдена');
