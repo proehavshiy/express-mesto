@@ -13,7 +13,12 @@ const { setCors } = require('./middlewares/middlewares');
 const app = express();
 
 // подключаемся к серверу mongo
-// mongoose.connect();
+mongoose.connect('mmongodb://localhost:27017/mestodb', {
+  useNewUrlParser: true,
+  useCreateIndex: true,
+  useFindAndModify: false,
+  useUnifiedTopology: true,
+});
 
 // отдача статики
 app.use(express.static(path.resolve(__dirname, 'public')));
@@ -21,8 +26,17 @@ app.use(express.static(path.resolve(__dirname, 'public')));
 app.use(setCors);
 // мидлвара для собирания тела request JSON-формата
 app.use(bodyParser.json());
+
+// временная мидлвара - хардкод юзера
+app.use('/', (req, res, next) => {
+  req.user = {
+    _id: '61013e4c33a8653daab022f7',
+  };
+  next();
+});
 // роут users
 app.use('/users', usersRouter);
+
 // роут cards
 app.use('/cards', cardsRouter);
 
