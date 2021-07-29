@@ -1,0 +1,7 @@
+const ERROR_STATUSES = {
+  INCORRECT_CODE: '400',
+  NOTFOUND_CODE: '404',
+  DEFAULT_CODE: '500',
+};
+
+module.exports = ERROR_STATUSES;
