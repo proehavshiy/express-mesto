@@ -1,6 +1,5 @@
 const User = require('../models/user');
-const ERROR_TYPES = require('../utils/errorTypes');
-const { INCORRECT_CODE, NOTFOUND_CODE, DEFAULT_CODE } = require('../utils/errorStatuses');
+const { catchHandlers } = require('../utils/errorResponses');
 
 function getUsers(req, res) {
   User.find({})
@@ -18,11 +17,7 @@ function getUsers(req, res) {
         return obj;
       })));
     })
-    .catch(() => {
-      res.status(DEFAULT_CODE).send({
-        message: 'Ошибка получения массива пользователей',
-      });
-    });
+    .catch(() => catchHandlers.getUsers(res));
 }
 
 function getUser(req, res) {
@@ -39,20 +34,7 @@ function getUser(req, res) {
         _id,
       });
     })
-    .catch((error) => {
-      if (ERROR_TYPES.includes(error.name)) {
-        res.status(NOTFOUND_CODE).send({
-          message: `Пользователь по указанному _id: ${userId} не найден`,
-          name: error.name,
-          details: error.message,
-        });
-      }
-      res.status(DEFAULT_CODE).send({
-        message: 'На сервере произошла ошибка',
-        name: error.name,
-        details: error.message,
-      });
-    });
+    .catch((error) => catchHandlers.getUser(res, error.name));
 }
 
 function postUser(req, res) {
@@ -72,25 +54,11 @@ function postUser(req, res) {
         _id,
       });
     })
-    .catch((error) => {
-      if (ERROR_TYPES.includes(error.name)) {
-        res.status(INCORRECT_CODE).send({
-          message: 'Переданы некорректные данные при создании пользователя.',
-          name: error.name,
-          details: error.message,
-        });
-      }
-      res.status(DEFAULT_CODE).send({
-        message: 'На сервере произошла ошибка',
-        name: error.name,
-        details: error.message,
-      });
-    });
+    .catch((error) => catchHandlers.postUser(res, error.name));
 }
 
 function updateUser(req, res) {
-  // const { _id } = req.user; // захардкоженый id юзера
-  const _id = '61029e5093e81058a34a9a1e'; // '61029e5093e81058a34a9a1e';
+  const { _id } = req.user; // захардкоженый id юзера
   const { name, about } = req.body;
   User.findByIdAndUpdate(
     _id,
@@ -120,32 +88,11 @@ function updateUser(req, res) {
         });
       }
     })
-    .catch((error) => {
-      if (error.name === 'TypeError') { // ????? возникает, когда несуществующий _id передаешь на вход и при условии что в then есть проверка равенства id
-        res.status(NOTFOUND_CODE).send({
-          message: `Пользователь по указанному _id: ${_id} не найден`,
-          name: error.name,
-          details: error.message,
-        });
-      }
-      if (error.name === 'CastError') { // Mongoose could not convert a value to the type defined in the schema path.
-        res.status(INCORRECT_CODE).send({
-          message: 'Переданы некорректные данные при обновлении профиля.',
-          name: error.name,
-          details: error.message,
-        });
-      }
-      res.status(DEFAULT_CODE).send({
-        message: 'На сервере произошла ошибка',
-        name: error.name,
-        details: error.message,
-      });
-    });
+    .catch((error) => catchHandlers.updateUser(res, error.name));
 }
 
 function updateAvatar(req, res) {
-  // const { _id } = req.user; // захардкоженый id юзера
-  const _id = '61029e5093e81058a34a9a1e'; // '61029e5093e81058a34a9a1e';
+  const { _id } = req.user; // захардкоженый id юзера
   const { avatar } = req.body;
   User.findByIdAndUpdate(
     _id,
@@ -172,27 +119,7 @@ function updateAvatar(req, res) {
         });
       }
     })
-    .catch((error) => {
-      if (error.name === 'TypeError') { // ????? возникает, когда несуществующий _id передаешь на вход и при условии что в then есть проверка равенства id
-        res.status(NOTFOUND_CODE).send({
-          message: `Пользователь по указанному _id: ${_id} не найден`,
-          name: error.name,
-          details: error.message,
-        });
-      }
-      if (error.name === 'CastError') { // Mongoose could not convert a value to the type defined in the schema path.
-        res.status(INCORRECT_CODE).send({
-          message: 'Переданы некорректные данные при обновлении профиля.',
-          name: error.name,
-          details: error.message,
-        });
-      }
-      res.status(DEFAULT_CODE).send({
-        message: 'На сервере произошла ошибка',
-        name: error.name,
-        details: error.message,
-      });
-    });
+    .catch((error) => catchHandlers.updateAvatar(res, error.name));
 }
 
 module.exports = {

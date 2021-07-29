@@ -41,5 +41,6 @@ app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
 
 app.listen(PORT, () => {
-  console.log(`server has loaded on ${PORT}`);
+  // eslint-disable-next-line no-console
+  console.log(`the server has started on the port ${PORT}`);
 });

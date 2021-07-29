@@ -1,6 +1,5 @@
 const Card = require('../models/card');
-const ERROR_TYPES = require('../utils/errorTypes');
-const { INCORRECT_CODE, NOTFOUND_CODE, DEFAULT_CODE } = require('../utils/errorStatuses');
+const { catchHandlers } = require('../utils/errorResponses');
 
 function getCards(req, res) {
   Card.find({})
@@ -18,11 +17,7 @@ function getCards(req, res) {
         return obj;
       })));
     })
-    .catch(() => {
-      res.status(DEFAULT_CODE).send({
-        message: 'На сервере произошла ошибка',
-      });
-    });
+    .catch(() => catchHandlers.getCards(res));
 }
 
 function postCards(req, res) {
@@ -42,20 +37,7 @@ function postCards(req, res) {
         owner,
       });
     })
-    .catch((error) => {
-      if (ERROR_TYPES.includes(error.name)) {
-        res.status(INCORRECT_CODE).send({
-          message: 'Переданы некорректные данные при создании карточки.',
-          name: error.name,
-          details: error.message,
-        });
-      }
-      res.status(DEFAULT_CODE).send({
-        message: 'На сервере произошла ошибка',
-        name: error.name,
-        details: error.message,
-      });
-    });
+    .catch((error) => catchHandlers.postCards(res, error.name));
 }
 
 function deleteCardById(req, res) {
@@ -66,20 +48,7 @@ function deleteCardById(req, res) {
         message: `Карточка ${deletedCard._id} успешно удалена`,
       });
     })
-    .catch((error) => {
-      if (ERROR_TYPES.includes(error.name)) {
-        res.status(NOTFOUND_CODE).send({
-          message: `Карточка с указанным _id: ${cardId} не найдена.`,
-          name: error.name,
-          details: error.message,
-        });
-      }
-      res.status(DEFAULT_CODE).send({
-        message: 'На сервере произошла ошибка',
-        name: error.name,
-        details: error.message,
-      });
-    });
+    .catch((error) => catchHandlers.deleteCardById(res, error.name));
 }
 
 function putCardLike(req, res) {
@@ -121,20 +90,7 @@ function putCardLike(req, res) {
       //   });
       // }
     })
-    .catch((error) => {
-      if (ERROR_TYPES.includes(error.name)) {
-        res.status(INCORRECT_CODE).send({
-          message: 'Переданы некорректные данные для постановки лайка.',
-          name: error.name,
-          details: error.message,
-        });
-      }
-      res.status(DEFAULT_CODE).send({
-        message: 'На сервере произошла ошибка',
-        name: error.name,
-        details: error.message,
-      });
-    });
+    .catch((error) => catchHandlers.putCardLike(res, error.name));
 }
 
 function deleteCardLike(req, res) {
@@ -174,20 +130,7 @@ function deleteCardLike(req, res) {
       //   });
       // }
     })
-    .catch((error) => {
-      if (ERROR_TYPES.includes(error.name)) {
-        res.status(INCORRECT_CODE).send({
-          message: 'Переданы некорректные данные для снятия лайка.',
-          name: error.name,
-          details: error.message,
-        });
-      }
-      res.status(DEFAULT_CODE).send({
-        message: 'На сервере произошла ошибка',
-        name: error.name,
-        details: error.message,
-      });
-    });
+    .catch((error) => catchHandlers.deleteCardLike(res, error.name));
 }
 
 module.exports = {
