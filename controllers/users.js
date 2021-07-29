@@ -1,10 +1,9 @@
 const User = require('../models/user');
-const { catchHandlers } = require('../utils/errorResponses');
+const catchErrors = require('../utils/errorResponses');
 
 function getUsers(req, res) {
   User.find({})
     .then((users) => {
-      // res.send({ users });
       res.send(users.map(((user) => {
         const {
           name, about, avatar, _id,
@@ -17,7 +16,7 @@ function getUsers(req, res) {
         return obj;
       })));
     })
-    .catch(() => catchHandlers.getUsers(res));
+    .catch((error) => catchErrors('getUsers', res, error.name));
 }
 
 function getUser(req, res) {
@@ -34,7 +33,8 @@ function getUser(req, res) {
         _id,
       });
     })
-    .catch((error) => catchHandlers.getUser(res, error.name));
+    .catch((error) => catchErrors('getUser', res, error.name));
+  // .catch((error) => catchHandlers.getUser(res, error.name));
 }
 
 function postUser(req, res) {
@@ -54,7 +54,7 @@ function postUser(req, res) {
         _id,
       });
     })
-    .catch((error) => catchHandlers.postUser(res, error.name));
+    .catch((error) => catchErrors('postUser', res, error.name));
 }
 
 function updateUser(req, res) {
@@ -88,7 +88,7 @@ function updateUser(req, res) {
         });
       }
     })
-    .catch((error) => catchHandlers.updateUser(res, error.name));
+    .catch((error) => catchErrors('updateUser', res, error.name));
 }
 
 function updateAvatar(req, res) {
@@ -119,7 +119,7 @@ function updateAvatar(req, res) {
         });
       }
     })
-    .catch((error) => catchHandlers.updateAvatar(res, error.name));
+    .catch((error) => catchErrors('updateAvatar', res, error.name));
 }
 
 module.exports = {

@@ -1,8 +1,8 @@
 // существует ли юзер
 function doesUserExist(req, res, next) {
   const { userId } = req.params;
-  if (userId === 'error') { // потом написать более нормальную проверку по базе
-    res.send({ error: 'Такого пользователя нет' });
+  if (userId === 'err') { // потом написать более нормальную проверку по базе на основе регулярных выражений
+    res.status(404).send({ message: 'Пользователь по указанному id не найден' });
   }
   next();
 }

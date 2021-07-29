@@ -1,5 +1,5 @@
 const Card = require('../models/card');
-const { catchHandlers } = require('../utils/errorResponses');
+const catchErrors = require('../utils/errorResponses');
 
 function getCards(req, res) {
   Card.find({})
@@ -17,7 +17,7 @@ function getCards(req, res) {
         return obj;
       })));
     })
-    .catch(() => catchHandlers.getCards(res));
+    .catch((error) => catchErrors('getCards', res, error.name));
 }
 
 function postCards(req, res) {
@@ -37,7 +37,7 @@ function postCards(req, res) {
         owner,
       });
     })
-    .catch((error) => catchHandlers.postCards(res, error.name));
+    .catch((error) => catchErrors('postCards', res, error.name));
 }
 
 function deleteCardById(req, res) {
@@ -48,7 +48,7 @@ function deleteCardById(req, res) {
         message: `Карточка ${deletedCard._id} успешно удалена`,
       });
     })
-    .catch((error) => catchHandlers.deleteCardById(res, error.name));
+    .catch((error) => catchErrors('deleteCardById', res, error.name));
 }
 
 function putCardLike(req, res) {
@@ -90,7 +90,7 @@ function putCardLike(req, res) {
       //   });
       // }
     })
-    .catch((error) => catchHandlers.putCardLike(res, error.name));
+    .catch((error) => catchErrors('putCardLike', res, error.name));
 }
 
 function deleteCardLike(req, res) {
@@ -130,7 +130,7 @@ function deleteCardLike(req, res) {
       //   });
       // }
     })
-    .catch((error) => catchHandlers.deleteCardLike(res, error.name));
+    .catch((error) => catchErrors('deleteCardLike', res, error.name));
 }
 
 module.exports = {
