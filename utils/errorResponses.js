@@ -1,47 +1,37 @@
 const { INCORRECT_CODE, NOTFOUND_CODE, DEFAULT_CODE } = require('./errorStatuses');
-const ERROR_TYPES = require('./errorTypes');
-const {
-  lostUser, wrongProfileData, wrongCardId, wrongData, byDfault,
-} = require('./errorMessages');
+const { wrongId, wrongData, byDfault } = require('./errorMessages');
 
-function catchErrors(nameOfHandler, res, errorName) {
-  if (nameOfHandler === 'updateUser' || nameOfHandler === 'updateAvatar') {
-    if (errorName === 'TypeError') {
+function catchErrors(nameOfHandler, res, error) {
+  if (error.name === 'CastError') {
+    if (error.path && error.path !== '_id') { // при нарушении типа данных в полях запроса (в обновлении юзера и аватара - напр - "about": ["about"])
+      // eslint-disable-next-line max-len
+      // вылезает CastError, хотя по логике это должна быть ValidationError, но ошибка валидации не возникает
       return res.status(NOTFOUND_CODE).send({
-        message: lostUser,
-      });
-    }
-    if (errorName === 'CastError') {
-      return res.status(INCORRECT_CODE).send({
-        message: wrongProfileData,
-      });
-    }
-  }
-  if (nameOfHandler === 'deleteCardById') {
-    if (ERROR_TYPES.includes(errorName)) {
-      return res.status(NOTFOUND_CODE).send({
-        message: wrongCardId,
-      });
-    }
-  }
-  if (nameOfHandler === 'getUser') {
-    if (ERROR_TYPES.includes(errorName)) {
-      return res.status(NOTFOUND_CODE).send({
-        message: lostUser,
-      });
-    }
-  }
-  if (nameOfHandler === 'postCards' || nameOfHandler === 'postUser' || nameOfHandler === 'putCardLike' || nameOfHandler === 'deleteCardLike') {
-    if (ERROR_TYPES.includes(errorName)) {
-      return res.status(INCORRECT_CODE).send({
         message: wrongData,
       });
+      // eslint-disable-next-line no-else-return
+    } else if (nameOfHandler === 'deleteCardById' || nameOfHandler === 'getUser') { // статус 400 для удаления карточки и получения юзера, как ревьюер указал
+      return res.status(NOTFOUND_CODE).send({
+        message: wrongId,
+      });
+    } else {
+      return res.status(INCORRECT_CODE).send({
+        message: wrongId,
+      });
     }
+  } else if (error.name === 'ValidationError') { // ошибки валидации схемы
+    return res.status(NOTFOUND_CODE).send({
+      message: wrongData,
+    });
+  } else if (error.message === 'notValidId') { // обработка ошибки с null значением
+    return res.status(INCORRECT_CODE).send({
+      message: wrongId,
+    });
+  } else { // ошибка по умолчанию
+    return res.status(DEFAULT_CODE).send({
+      message: byDfault,
+    });
   }
-  // дефолтная ошибка
-  return res.status(DEFAULT_CODE).send({
-    message: byDfault,
-  });
 }
 
 module.exports = catchErrors;

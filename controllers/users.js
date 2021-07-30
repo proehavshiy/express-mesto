@@ -16,12 +16,13 @@ function getUsers(req, res) {
         return obj;
       })));
     })
-    .catch((error) => catchErrors('getUsers', res, error.name));
+    .catch((error) => catchErrors('getUsers', res, error));
 }
 
 function getUser(req, res) {
   const { userId } = req.params;
   User.findById(userId)
+    .orFail(new Error('notValidId')) // отлавливаем ошибку с null значением
     .then((user) => {
       const {
         name, about, avatar, _id,
@@ -33,8 +34,7 @@ function getUser(req, res) {
         _id,
       });
     })
-    .catch((error) => catchErrors('getUser', res, error.name));
-  // .catch((error) => catchHandlers.getUser(res, error.name));
+    .catch((error) => catchErrors('getUser', res, error));
 }
 
 function postUser(req, res) {
@@ -54,7 +54,7 @@ function postUser(req, res) {
         _id,
       });
     })
-    .catch((error) => catchErrors('postUser', res, error.name));
+    .catch((error) => catchErrors('postUser', res, error));
 }
 
 function updateUser(req, res) {
@@ -72,23 +72,20 @@ function updateUser(req, res) {
       upsert: false, // если пользователь не найден, он будет создан
     },
   )
+    .orFail(new Error('notValidId')) // отлавливаем ошибку с null значением
     .then((updatedUser) => {
-      // если не сделать проверку по id,
-      // то ошибка TypeError "Cannot read property '_id' of null" не падает в catch
-      if (toString(_id) === toString(updatedUser._id)) {
-        const {
-          // eslint-disable-next-line no-shadow
-          name, about, avatar, _id,
-        } = updatedUser;
-        res.send({
-          name,
-          about,
-          avatar,
-          _id,
-        });
-      }
+      const {
+        // eslint-disable-next-line no-shadow
+        name, about, avatar, _id,
+      } = updatedUser;
+      res.send({
+        name,
+        about,
+        avatar,
+        _id,
+      });
     })
-    .catch((error) => catchErrors('updateUser', res, error.name));
+    .catch((error) => catchErrors('updateUser', res, error));
 }
 
 function updateAvatar(req, res) {
@@ -105,21 +102,18 @@ function updateAvatar(req, res) {
       upsert: false, // если пользователь не найден, он будет создан
     },
   )
+    .orFail(new Error('notValidId')) // отлавливаем ошибку с null значением
     .then((updatedAvatar) => {
-      // если не сделать проверку по id,
-      // то ошибка TypeError "Cannot read property '_id' of null" не падает в catch
-      if (toString(_id) === toString(updatedAvatar._id)) {
-        const {
-          // eslint-disable-next-line no-shadow
-          avatar, _id,
-        } = updatedAvatar;
-        res.send({
-          avatar,
-          _id,
-        });
-      }
+      const {
+        // eslint-disable-next-line no-shadow
+        avatar, _id,
+      } = updatedAvatar;
+      res.send({
+        avatar,
+        _id,
+      });
     })
-    .catch((error) => catchErrors('updateAvatar', res, error.name));
+    .catch((error) => catchErrors('updateAvatar', res, error));
 }
 
 module.exports = {

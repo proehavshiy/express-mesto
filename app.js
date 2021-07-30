@@ -2,12 +2,12 @@
 
 const express = require('express');
 const mongoose = require('mongoose');
-const path = require('path');
 
 const { PORT = 3000 } = process.env;
 const bodyParser = require('body-parser');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
+const errorRouter = require('./routes/error');
 const { setCors } = require('./middlewares/middlewares');
 
 const app = express();
@@ -20,8 +20,6 @@ mongoose.connect('mmongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
 });
 
-// отдача статики
-app.use(express.static(path.resolve(__dirname, 'public')));
 // мидлвара управления CORS
 app.use(setCors);
 // мидлвара для собирания тела request JSON-формата
@@ -39,6 +37,9 @@ app.use('/users', usersRouter);
 
 // роут cards
 app.use('/cards', cardsRouter);
+
+// роут 404
+app.use('*', errorRouter);
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console

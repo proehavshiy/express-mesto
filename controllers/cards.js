@@ -17,7 +17,7 @@ function getCards(req, res) {
         return obj;
       })));
     })
-    .catch((error) => catchErrors('getCards', res, error.name));
+    .catch((error) => catchErrors('getCards', res, error));
 }
 
 function postCards(req, res) {
@@ -37,18 +37,19 @@ function postCards(req, res) {
         owner,
       });
     })
-    .catch((error) => catchErrors('postCards', res, error.name));
+    .catch((error) => catchErrors('postCards', res, error));
 }
 
 function deleteCardById(req, res) {
   const { cardId } = req.params;
   Card.findByIdAndRemove(cardId)
+    .orFail(new Error('notValidId')) // отлавливаем ошибку с null значением
     .then((deletedCard) => {
       res.send({
         message: `Карточка ${deletedCard._id} успешно удалена`,
       });
     })
-    .catch((error) => catchErrors('deleteCardById', res, error.name));
+    .catch((error) => { catchErrors('deleteCardById', res, error); });
 }
 
 function putCardLike(req, res) {
@@ -65,6 +66,7 @@ function putCardLike(req, res) {
       upsert: false, // если пользователь не найден, он будет создан
     },
   )
+    .orFail(new Error('notValidId')) // отлавливаем ошибку с null значением
     .then((likedCard) => {
       const {
         // eslint-disable-next-line no-shadow
@@ -77,25 +79,14 @@ function putCardLike(req, res) {
         _id,
         owner,
       });
-      // проверка на повторный лайк
-      // if (card.likes.includes(_id)) {
-      //   res.status(NOTFOUND_CODE).send({
-      //     message: 'Повторная постановка лайка карточке невозможна.',
-      //     status: card.likes.includes(_id),
-      //   });
-      // } else {
-      //   res.send({
-      //     message: `лайк карточке ${cardId} записан.`,
-      //     status: card.likes.includes(_id),
-      //   });
-      // }
     })
-    .catch((error) => catchErrors('putCardLike', res, error.name));
+    .catch((error) => catchErrors('putCardLike', res, error));
 }
 
 function deleteCardLike(req, res) {
   const { cardId } = req.params;
   const { _id } = req.user; // захардкоженый id
+  // const _id = '111'
   Card.findByIdAndUpdate(
     cardId,
     {
@@ -107,6 +98,7 @@ function deleteCardLike(req, res) {
       upsert: false, // если пользователь не найден, он будет создан
     },
   )
+    .orFail(new Error('notValidId')) // отлавливаем ошибку с null значением
     .then((unlikedCard) => {
       const {
         // eslint-disable-next-line no-shadow
@@ -119,18 +111,8 @@ function deleteCardLike(req, res) {
         _id,
         owner,
       });
-      // // проверка на повторный лайк
-      // if (!unlikedCard.likes.includes(_id)) {
-      //   res.status(NOTFOUND_CODE).send({
-      //     message: 'Повторное снятие лайка у карточки невозможна.',
-      //   });
-      // } else {
-      //   res.send({
-      //     message: `лайк у карточки ${cardId} убран`,
-      //   });
-      // }
     })
-    .catch((error) => catchErrors('deleteCardLike', res, error.name));
+    .catch((error) => catchErrors('deleteCardLike', res, error));
 }
 
 module.exports = {
