@@ -2,6 +2,7 @@
 
 const express = require('express');
 const mongoose = require('mongoose');
+const helmet = require('helmet');
 
 const { PORT = 3000 } = process.env;
 const bodyParser = require('body-parser');
@@ -20,6 +21,10 @@ mongoose.connect('mmongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
 });
 
+// мидлвара helmet для защиты передачи данных
+app.use(helmet());
+app.disable('x-powered-by');
+
 // мидлвара управления CORS
 app.use(setCors);
 // мидлвара для собирания тела request JSON-формата
@@ -28,7 +33,7 @@ app.use(bodyParser.json());
 // временная мидлвара - хардкод юзера
 app.use('/', (req, res, next) => {
   req.user = {
-    _id: '61013e4c33a8653daab022f7', // '61013e4c33a8653daab022f7'
+    _id: '61013e4c33a8653daab022f6', // '61013e4c33a8653daab022f7'
   };
   next();
 });
