@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const catchErrors = require('../utils/errorResponses');
 
@@ -6,13 +7,15 @@ function getUsers(req, res) {
     .then((users) => {
       res.send(users.map(((user) => {
         const {
-          name, about, avatar, _id,
+          name, about, avatar, _id, email, password,
         } = user;
         const obj = {};
         obj.name = name;
         obj.about = about;
         obj.avatar = avatar;
         obj._id = _id;
+        obj.email = email; // потом убрать
+        obj.password = password; // потом убрать
         return obj;
       })));
     })
@@ -38,10 +41,18 @@ function getUser(req, res) {
 }
 
 function postUser(req, res) {
-  const { name, about, avatar } = req.body;
-  // создаем в DB нового юзера через использование метода модели - create.
-  // В колбэках обрабатываем ок или ошибку
-  User.create({ name, about, avatar })
+  // eslint-disable-next-line object-curly-newline
+  const { name, about, avatar, email, password } = req.body;
+  // защищаем пароль хешированием через библиотеку bcrypt
+  bcrypt.hash(password, 10)
+    // eslint-disable-next-line max-len
+    .then((hashedPassword) => User.create({ // создаем в DB нового юзера через использование метода модели - create.
+      name,
+      about,
+      avatar,
+      email,
+      password: hashedPassword,
+    }))
     .then((user) => {
       const {
         // eslint-disable-next-line no-shadow
@@ -51,6 +62,8 @@ function postUser(req, res) {
         name,
         about,
         avatar,
+        email, // убрать после
+        // password: hashedPassword, // убрать после
         _id,
       });
     })
