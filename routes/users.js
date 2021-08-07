@@ -7,6 +7,7 @@ const {
   postUser,
   updateUser,
   updateAvatar,
+  login,
 } = require('../controllers/users');
 // import middlewares
 const {
@@ -21,5 +22,7 @@ usersRouter.get('/:userId', getUser);
 usersRouter.post('/', postUser);
 usersRouter.patch('/me', updateUser);
 usersRouter.patch('/me/avatar', updateAvatar);
+
+usersRouter.post('/signin', login);
 
 module.exports = usersRouter;

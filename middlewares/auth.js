@@ -4,7 +4,7 @@ function authByToken(req, res, next) {
   const { authorization } = req.headers; // извлекаем заголовок с токеном из хедера
   // если заголовка нет / он не начинается с Bearer, вернем ошибку
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    return res.status(403).send({
+    return res.status(401).send({
       message: 'Необходима авторизация',
     });
   }
