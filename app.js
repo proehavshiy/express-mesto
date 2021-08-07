@@ -3,6 +3,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
+const auth = require('./middlewares/auth');
 
 const { PORT = 3000 } = process.env;
 const bodyParser = require('body-parser');
@@ -37,6 +38,13 @@ app.use('/', (req, res, next) => {
   };
   next();
 });
+
+// роуты, не требующие авторизации,
+// например, регистрация и логин ПОМЕСТИТЬ СЮДА, ДО auth
+
+// защита роутов мидлварой авторизации по токену
+app.use(auth);
+
 // роут users
 app.use('/users', usersRouter);
 

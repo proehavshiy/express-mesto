@@ -1,4 +1,6 @@
 const bcrypt = require('bcryptjs');
+
+const jwt = ('jsonwebtoken');
 const User = require('../models/user');
 const catchErrors = require('../utils/errorResponses');
 
@@ -129,10 +131,30 @@ function updateAvatar(req, res) {
     .catch((error) => catchErrors('updateAvatar', res, error));
 }
 
+// аутентификация (логин)
+function login(req, res) {
+  const { email, password } = req.body;
+  // ищем пользователя по емейлу в базе
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      // создаем и отправляем пользователю токен
+      const token = jwt.sign(
+        { _id: user._id }, // то, что шифруем
+        'temporary-secret-signature', // подпись секретного ключа для шифрования
+        { expiresIn: '7d' }, // опции : токен будет просрочен через 7 дней
+      );
+      res.send({ token });
+    })
+    .catch((err) => res.status(401).send(
+      { message: err.message },
+    ));
+}
+
 module.exports = {
   getUsers,
   getUser,
   postUser,
   updateUser,
   updateAvatar,
+  login,
 };
