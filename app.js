@@ -12,6 +12,12 @@ const cardsRouter = require('./routes/cards');
 const errorRouter = require('./routes/error');
 const { setCors } = require('./middlewares/middlewares');
 
+// import controllers
+const {
+  postUser,
+  login,
+} = require('./controllers/users');
+
 const app = express();
 
 // подключаемся к серверу mongo
@@ -32,15 +38,16 @@ app.use(setCors);
 app.use(bodyParser.json());
 
 // временная мидлвара - хардкод юзера
-app.use('/', (req, res, next) => {
-  req.user = {
-    _id: '61013e4c33a8653daab022f6', // '61013e4c33a8653daab022f7'
-  };
-  next();
-});
+// app.use('/', (req, res, next) => {
+//   req.user = {
+//     _id: '61013e4c33a8653daab022f6', // '61013e4c33a8653daab022f7'
+//   };
+//   next();
+// });
 
-// роуты, не требующие авторизации,
-// например, регистрация и логин ПОМЕСТИТЬ СЮДА, ДО auth
+// роуты, не требующие авторизации
+app.post('/signin', login);
+app.post('/signup', postUser);
 
 // защита роутов мидлварой авторизации по токену
 app.use(auth);

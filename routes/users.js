@@ -4,10 +4,9 @@ const usersRouter = require('express').Router();
 const {
   getUsers,
   getUser,
-  postUser,
   updateUser,
   updateAvatar,
-  login,
+  getUserContent,
 } = require('../controllers/users');
 // import middlewares
 const {
@@ -17,12 +16,11 @@ const {
 usersRouter.get('/', getUsers);
 
 usersRouter.get('/:userId', doesUserExist);
-usersRouter.get('/:userId', getUser);
 
-usersRouter.post('/', postUser);
+usersRouter.get('/me', getUserContent);
 usersRouter.patch('/me', updateUser);
 usersRouter.patch('/me/avatar', updateAvatar);
 
-usersRouter.post('/signin', login);
+usersRouter.get('/:userId', getUser);
 
 module.exports = usersRouter;
