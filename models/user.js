@@ -1,5 +1,13 @@
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
+const validator = require('validator');
+
+const emailValidator = function emailValidator(str) {
+  return validator.isEmail(str, {
+    allow_utf8_local_part: false,
+    blacklisted_chars: '#$!@%^&*()_-+={}[]\'"\\~`§',
+  });
+};
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -21,15 +29,19 @@ const userSchema = new mongoose.Schema({
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
     required: false,
   },
-  email: { // добавить обработку через Validator позже
+  email: {
     type: String,
     required: true,
     unique: true,
+    validate: {
+      validator: emailValidator, // валидация емейла через модуль validator
+    },
   },
-  password: { // добавить обработку через Validator позже
+  password: {
     type: String,
     required: true,
     minlength: 8,
+    select: false,
   },
 });
 
@@ -38,7 +50,7 @@ const userSchema = new mongoose.Schema({
 // у него будет два параметра — почта и пароль
 userSchema.statics.findUserByCredentials = function (email, password) {
   // ищем пользователя по емейлу в базе
-  return this.findOne({ email })
+  return this.findOne({ email }).select('+password') // чтобы принудительно отдавать сюда пароль
     .then((user) => {
       // если пользователя по емейлу нет
       if (!user) {
