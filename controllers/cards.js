@@ -42,12 +42,23 @@ function postCards(req, res) {
 
 function deleteCardById(req, res) {
   const { cardId } = req.params;
-  Card.findByIdAndRemove(cardId)
-    .orFail(new Error('notValidId')) // отлавливаем ошибку с null значением
-    .then((deletedCard) => {
-      res.send({
-        message: `Карточка ${deletedCard._id} успешно удалена`,
-      });
+  const userId = req.user._id;
+  // ищем карточку и сравниваем id пользователя с id владельца
+  Card.findById(cardId)
+    .orFail(new Error('notValidId')) // отлавливаем ошибку с null значением, если такой карточки нет
+    .then((card) => {
+      if (userId !== card.owner.toString()) { // не знаю, как ее перенаправить эту ошибку в catch
+        res.status(403).send({ message: 'Удаление чужой карточки невозможно' });
+      } else {
+        // если пользователь и владелец совпадают, удаляем карточку
+        Card.findByIdAndRemove(cardId)
+          .orFail(new Error('notValidId')) // отлавливаем ошибку с null значением
+          .then((deletedCard) => {
+            res.send({
+              message: `Карточка ${deletedCard._id} успешно удалена`,
+            });
+          });
+      }
     })
     .catch((error) => { catchErrors('deleteCardById', res, error); });
 }

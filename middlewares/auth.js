@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 // eslint-disable-next-line consistent-return
 function authByToken(req, res, next) {
-  console.log('header:', req.headers);
+  // console.log('header:', req.headers);
   const { authorization } = req.headers; // извлекаем заголовок с токеном из хедера
   // если заголовка нет / он не начинается с Bearer, вернем ошибку
   if (!authorization || !authorization.startsWith('Bearer ')) {

@@ -1,6 +1,7 @@
 const { wrongId, wrongData, byDfault } = require('./errorMessages');
 
 function catchErrors(nameOfHandler, res, error) {
+  console.log('error.message', error.message)
   if (error.name === 'CastError') {
     if (error.path && error.path !== '_id') { // при нарушении типа данных в полях запроса (в обновлении юзера и аватара - напр - "about": ["about"])
       // eslint-disable-next-line max-len
@@ -26,6 +27,8 @@ function catchErrors(nameOfHandler, res, error) {
     return res.status(404).send({
       message: wrongId,
     });
+  } else if (error.message === 'notMyCard') {
+    return res.status(403).send({ message: 'Удаление чужой карточки невозможно' });
   } else { // ошибка по умолчанию
     return res.status(500).send({
       message: byDfault,
