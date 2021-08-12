@@ -1,11 +1,11 @@
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const validator = require('validator');
+const ErrorConstructor = require('../middlewares/ErrorConstructor');
 
 const emailValidator = function emailValidator(str) {
   return validator.isEmail(str, {
     allow_utf8_local_part: false,
-    blacklisted_chars: '#$!@%^&*()_-+={}[]\'"\\~`§',
   });
 };
 
@@ -48,20 +48,20 @@ const userSchema = new mongoose.Schema({
 // проверка емейла и пороля при аутентификации
 // добавим метод findUserByCredentials схеме пользователя
 // у него будет два параметра — почта и пароль
-userSchema.statics.findUserByCredentials = function (email, password) {
+userSchema.statics.findUserByCredentials = function findUserByCredentials(email, password) {
   // ищем пользователя по емейлу в базе
   return this.findOne({ email }).select('+password') // чтобы принудительно отдавать сюда пароль
     .then((user) => {
       // если пользователя по емейлу нет
       if (!user) {
-        return Promise.reject(new Error('Неправильные почта или пароль'));
+        return Promise.reject(new ErrorConstructor('invalidPasswordOrEmail'));
       }
       // если пользователь нашелся в базе
       // сравниваем переданный пароль и хеш из базы
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new Error('Неправильные почта или пароль'));
+            return Promise.reject(new ErrorConstructor('invalidPasswordOrEmail'));
           }
           // возвращаем юзера, если все проверки удачны
           return user;

@@ -1,7 +1,8 @@
+/* eslint-disable no-param-reassign */
 const Card = require('../models/card');
-const catchErrors = require('../utils/errorResponses');
+const ErrorConstructor = require('../middlewares/ErrorConstructor');
 
-function getCards(req, res) {
+function getCards(req, res, next) {
   Card.find({})
     .then((cards) => {
       res.send(cards.map(((card) => {
@@ -17,11 +18,11 @@ function getCards(req, res) {
         return obj;
       })));
     })
-    .catch((error) => catchErrors('getCards', res, error));
+    .catch((error) => next(error));
 }
 
-function postCards(req, res) {
-  const { _id } = req.user; // захардкоженый id юзера
+function postCards(req, res, next) {
+  const { _id } = req.user;
   const { name, link } = req.body;
   Card.create({ name, link, owner: _id })
     .then((card) => {
@@ -37,22 +38,22 @@ function postCards(req, res) {
         owner,
       });
     })
-    .catch((error) => catchErrors('postCards', res, error));
+    .catch((error) => next(error));
 }
 
-function deleteCardById(req, res) {
+function deleteCardById(req, res, next) {
   const { cardId } = req.params;
   const userId = req.user._id;
   // ищем карточку и сравниваем id пользователя с id владельца
   Card.findById(cardId)
-    .orFail(new Error('notValidId')) // отлавливаем ошибку с null значением, если такой карточки нет
+    .orFail(new ErrorConstructor('notValidId')) // отлавливаем ошибку с null значением, если такой карточки нет
     .then((card) => {
-      if (userId !== card.owner.toString()) { // не знаю, как ее перенаправить эту ошибку в catch
-        res.status(403).send({ message: 'Удаление чужой карточки невозможно' });
+      if (userId !== card.owner.toString()) {
+        throw new ErrorConstructor('notMyCard'); // ошибка удаления чужой карточки
       } else {
         // если пользователь и владелец совпадают, удаляем карточку
         Card.findByIdAndRemove(cardId)
-          .orFail(new Error('notValidId')) // отлавливаем ошибку с null значением
+          .orFail(new ErrorConstructor('notValidId')) // отлавливаем ошибку с null значением, если такой карточки нет
           .then((deletedCard) => {
             res.send({
               message: `Карточка ${deletedCard._id} успешно удалена`,
@@ -60,10 +61,10 @@ function deleteCardById(req, res) {
           });
       }
     })
-    .catch((error) => { catchErrors('deleteCardById', res, error); });
+    .catch((error) => next(error));
 }
 
-function putCardLike(req, res) {
+function putCardLike(req, res, next) {
   const { cardId } = req.params;
   const { _id } = req.user; // захардкоженый id юзера
   Card.findByIdAndUpdate(
@@ -77,7 +78,7 @@ function putCardLike(req, res) {
       upsert: false, // если пользователь не найден, он будет создан
     },
   )
-    .orFail(new Error('notValidId')) // отлавливаем ошибку с null значением
+    .orFail(new ErrorConstructor('notValidId')) // отлавливаем ошибку с null значением
     .then((likedCard) => {
       const {
         // eslint-disable-next-line no-shadow
@@ -91,13 +92,12 @@ function putCardLike(req, res) {
         owner,
       });
     })
-    .catch((error) => catchErrors('putCardLike', res, error));
+    .catch((error) => next(error));
 }
 
-function deleteCardLike(req, res) {
+function deleteCardLike(req, res, next) {
   const { cardId } = req.params;
-  const { _id } = req.user; // захардкоженый id
-  // const _id = '111'
+  const { _id } = req.user;
   Card.findByIdAndUpdate(
     cardId,
     {
@@ -109,7 +109,7 @@ function deleteCardLike(req, res) {
       upsert: false, // если пользователь не найден, он будет создан
     },
   )
-    .orFail(new Error('notValidId')) // отлавливаем ошибку с null значением
+    .orFail(new ErrorConstructor('notValidId')) // отлавливаем ошибку с null значением
     .then((unlikedCard) => {
       const {
         // eslint-disable-next-line no-shadow
@@ -123,7 +123,7 @@ function deleteCardLike(req, res) {
         owner,
       });
     })
-    .catch((error) => catchErrors('deleteCardLike', res, error));
+    .catch((error) => next(error));
 }
 
 module.exports = {

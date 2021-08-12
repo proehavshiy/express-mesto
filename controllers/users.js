@@ -1,33 +1,33 @@
+/* eslint-disable no-param-reassign */
 const bcrypt = require('bcryptjs');
 
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const catchErrors = require('../utils/errorResponses');
+const ErrorConstructor = require('../middlewares/ErrorConstructor');
 
-function getUsers(req, res) {
+function getUsers(req, res, next) {
   User.find({})
     .then((users) => {
       res.send(users.map(((user) => {
         const {
-          name, about, avatar, _id, email, password,
+          name, about, avatar, _id, email,
         } = user;
         const obj = {};
         obj.name = name;
         obj.about = about;
         obj.avatar = avatar;
         obj._id = _id;
-        obj.email = email; // потом убрать
-        obj.password = password; // потом убрать
+        obj.email = email;
         return obj;
       })));
     })
-    .catch((error) => catchErrors('getUsers', res, error));
+    .catch((error) => next(error));
 }
 
-function getUser(req, res) {
+function getUser(req, res, next) {
   const { userId } = req.params;
   User.findById(userId)
-    .orFail(new Error('notValidId')) // отлавливаем ошибку с null значением
+    .orFail(new ErrorConstructor('notValidId')) // отлавливаем ошибку с null значением
     .then((user) => {
       const {
         name, about, avatar, _id,
@@ -39,10 +39,10 @@ function getUser(req, res) {
         _id,
       });
     })
-    .catch((error) => catchErrors('getUser', res, error));
+    .catch((error) => next(error));
 }
 
-function postUser(req, res) {
+function postUser(req, res, next) {
   // eslint-disable-next-line object-curly-newline
   const { name, about, avatar, email, password } = req.body;
   // защищаем пароль хешированием через библиотеку bcrypt
@@ -64,15 +64,14 @@ function postUser(req, res) {
         name,
         about,
         avatar,
-        email, // убрать после
-        // password: hashedPassword, // убрать после
+        email,
         _id,
       });
     })
-    .catch((error) => catchErrors('postUser', res, error));
+    .catch((error) => next(error));
 }
 
-function updateUser(req, res) {
+function updateUser(req, res, next) {
   const { _id } = req.user; // захардкоженый id юзера
   const { name, about } = req.body;
   User.findByIdAndUpdate(
@@ -87,7 +86,7 @@ function updateUser(req, res) {
       upsert: false, // если пользователь не найден, он будет создан
     },
   )
-    .orFail(new Error('notValidId')) // отлавливаем ошибку с null значением
+    .orFail(new ErrorConstructor('notValidId')) // отлавливаем ошибку с null значением
     .then((updatedUser) => {
       const {
         // eslint-disable-next-line no-shadow
@@ -100,10 +99,10 @@ function updateUser(req, res) {
         _id,
       });
     })
-    .catch((error) => catchErrors('updateUser', res, error));
+    .catch((error) => next(error));
 }
 
-function updateAvatar(req, res) {
+function updateAvatar(req, res, next) {
   const { _id } = req.user; // захардкоженый id юзера
   const { avatar } = req.body;
   User.findByIdAndUpdate(
@@ -117,7 +116,7 @@ function updateAvatar(req, res) {
       upsert: false, // если пользователь не найден, он будет создан
     },
   )
-    .orFail(new Error('notValidId')) // отлавливаем ошибку с null значением
+    .orFail(new ErrorConstructor('notValidId')) // отлавливаем ошибку с null значением
     .then((updatedAvatar) => {
       const {
         // eslint-disable-next-line no-shadow
@@ -128,11 +127,11 @@ function updateAvatar(req, res) {
         _id,
       });
     })
-    .catch((error) => catchErrors('updateAvatar', res, error));
+    .catch((error) => next(error));
 }
 
 // аутентификация (логин)
-function login(req, res) {
+function login(req, res, next) {
   const { email, password } = req.body;
   // ищем пользователя по емейлу в базе
   User.findUserByCredentials(email, password)
@@ -143,17 +142,14 @@ function login(req, res) {
         'some-secret-key', // подпись секретного ключа для шифрования
         { expiresIn: '7d' }, // опции : токен будет просрочен через 7 дней
       );
-      // console.log('token', token)
       res.send({ token });
     })
-    .catch((err) => res.status(401).send({ message: err.message }));
+    .catch((error) => next(error));
 }
 
-function getUserContent(req, res) {
-  // console.log('req.user', req.user);
-
+function getUserContent(req, res, next) {
   User.findById(req.user)
-    .orFail(new Error('notValidId')) // отлавливаем ошибку с null значением
+    .orFail(new ErrorConstructor('notValidId')) // отлавливаем ошибку с null значением
     .then((user) => {
       const {
         _id, email,
@@ -163,8 +159,7 @@ function getUserContent(req, res) {
         email,
       });
     })
-    // .catch((error) => catchErrors('getContent', res, error));
-    .catch((err) => res.send(err));
+    .catch((error) => next(error));
 }
 
 module.exports = {

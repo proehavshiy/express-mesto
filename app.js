@@ -6,11 +6,13 @@ const helmet = require('helmet');
 const auth = require('./middlewares/auth');
 
 const { PORT = 3000 } = process.env;
+// eslint-disable-next-line import/order
 const bodyParser = require('body-parser');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 const errorRouter = require('./routes/error');
 const { setCors } = require('./middlewares/middlewares');
+const sendError = require('./middlewares/sendError');
 
 // import controllers
 const {
@@ -37,14 +39,6 @@ app.use(setCors);
 // мидлвара для собирания тела request JSON-формата
 app.use(bodyParser.json());
 
-// временная мидлвара - хардкод юзера
-// app.use('/', (req, res, next) => {
-//   req.user = {
-//     _id: '61013e4c33a8653daab022f6', // '61013e4c33a8653daab022f7'
-//   };
-//   next();
-// });
-
 // роуты, не требующие авторизации
 app.post('/signin', login);
 app.post('/signup', postUser);
@@ -60,6 +54,10 @@ app.use('/cards', cardsRouter);
 
 // роут 404
 app.use('*', errorRouter);
+
+// централизованный обработчик ошибок
+// eslint-disable-next-line no-unused-vars
+app.use((error, req, res, next) => sendError(error, res));
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
