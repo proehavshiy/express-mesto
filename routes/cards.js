@@ -1,5 +1,10 @@
 const cardsRouter = require('express').Router();
 
+const {
+  validateRequestOfPostUser,
+  validateRequestOfControllerWithCardId,
+} = require('../middlewares/requestValidation/validationOfCardsRequest'); // валидация входящих запросов по api
+
 // import controllers
 const {
   getCards,
@@ -10,9 +15,9 @@ const {
 } = require('../controllers/cards');
 
 cardsRouter.get('/', getCards);
-cardsRouter.post('/', postCards);
-cardsRouter.delete('/:cardId', deleteCardById);
-cardsRouter.put('/:cardId/likes', putCardLike);
-cardsRouter.delete('/:cardId/likes', deleteCardLike);
+cardsRouter.post('/', validateRequestOfPostUser(), postCards);
+cardsRouter.delete('/:cardId', validateRequestOfControllerWithCardId(), deleteCardById);
+cardsRouter.put('/:cardId/likes', validateRequestOfControllerWithCardId(), putCardLike);
+cardsRouter.delete('/:cardId/likes', validateRequestOfControllerWithCardId(), deleteCardLike);
 
 module.exports = cardsRouter;

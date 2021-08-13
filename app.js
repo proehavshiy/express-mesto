@@ -3,6 +3,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
+const validateRequestToken = require('./middlewares/requestValidation/validationOfToken');
+const { validateRequestOfregisterAndLogin } = require('./middlewares/requestValidation/validationOfUserRequests');
 const auth = require('./middlewares/auth');
 
 const { PORT = 3000 } = process.env;
@@ -40,11 +42,11 @@ app.use(setCors);
 app.use(bodyParser.json());
 
 // роуты, не требующие авторизации
-app.post('/signin', login);
-app.post('/signup', postUser);
+app.post('/signin', validateRequestOfregisterAndLogin(), login);
+app.post('/signup', validateRequestOfregisterAndLogin(), postUser);
 
-// защита роутов мидлварой авторизации по токену
-app.use(auth);
+// проверка заголовка запроса на наличие токена и защита роутов мидлварой авторизации по токену
+app.use(validateRequestToken, auth);
 
 // роут users
 app.use('/users', usersRouter);

@@ -1,5 +1,11 @@
+const { isCelebrateError } = require('celebrate'); // валидация входящих запросов по api
+
 function sendError(error, res) {
-  if (error.name === 'CastError') {
+  if (isCelebrateError(error)) { // обработка ошибок Celebrate Joi валидации запросов
+    res.status(400).send({
+      message: 'Переданы некорректные данные.',
+    });
+  } else if (error.name === 'CastError') {
     if (error.path && error.path !== '_id') { // при нарушении типа данных в полях запроса (в обновлении юзера и аватара - напр - "about": ["about"])
       // eslint-disable-next-line max-len
       // вылезает CastError, хотя по логике это должна быть ValidationError, но ошибка валидации не возникает

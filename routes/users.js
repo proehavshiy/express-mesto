@@ -8,19 +8,19 @@ const {
   updateAvatar,
   getUserContent,
 } = require('../controllers/users');
-// import middlewares
+
 const {
-  doesUserExist,
-} = require('../middlewares/middlewares');
+  validateRequestOfUpdateUser,
+  validateRequestOfUpdateAvatar,
+  validateRequestOfControllerWithUserId,
+} = require('../middlewares/requestValidation/validationOfUserRequests'); // валидация входящих запросов по api
 
 usersRouter.get('/', getUsers);
 
-usersRouter.get('/:userId', doesUserExist);
-
 usersRouter.get('/me', getUserContent);
-usersRouter.patch('/me', updateUser);
-usersRouter.patch('/me/avatar', updateAvatar);
+usersRouter.patch('/me', validateRequestOfUpdateUser(), updateUser);
+usersRouter.patch('/me/avatar', validateRequestOfUpdateAvatar(), updateAvatar);
 
-usersRouter.get('/:userId', getUser);
+usersRouter.get('/:userId', validateRequestOfControllerWithUserId(), getUser);
 
 module.exports = usersRouter;
