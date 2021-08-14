@@ -142,7 +142,15 @@ function login(req, res, next) {
         'some-secret-key', // подпись секретного ключа для шифрования
         { expiresIn: '7d' }, // опции : токен будет просрочен через 7 дней
       );
-      res.send({ token });
+      // res.send({ token });
+      // передача токена через cookie
+      res.cookie('token', token, {
+        maxAge: 3600000 * 24 * 7,
+        httpOnly: true,
+        sameSite: true,
+      }).end(res.send({
+        message: 'Токен записан в cookie',
+      }));
     })
     .catch((error) => next(error));
 }
