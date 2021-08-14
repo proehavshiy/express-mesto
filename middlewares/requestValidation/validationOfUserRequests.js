@@ -13,8 +13,8 @@ function validateRequestOfregisterAndLogin() {
 function validateRequestOfUpdateUser() {
   return celebrate({
     body: Joi.object().keys({
-      name: Joi.string().alphanum().required().min(2).max(30),
-      about: Joi.string().alphanum().required().min(2).max(30),
+      name: Joi.string().required().min(2).max(30),
+      about: Joi.string().required().min(2).max(30),
     }),
   });
 }

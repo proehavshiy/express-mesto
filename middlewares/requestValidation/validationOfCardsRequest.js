@@ -4,7 +4,7 @@ function validateRequestOfPostUser() {
   return celebrate({
     body: Joi.object().keys({
       // eslint-disable-next-line newline-per-chained-call
-      name: Joi.string().alphanum().required().min(2).max(30),
+      name: Joi.string().required().min(2).max(30),
       link: Joi.string().required().min(5),
     }),
   });

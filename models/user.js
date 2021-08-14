@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const validator = require('validator');
@@ -7,6 +8,11 @@ const emailValidator = function emailValidator(str) {
   return validator.isEmail(str, {
     allow_utf8_local_part: false,
   });
+};
+
+const linkValidator = function linkValidator(str) {
+  const regex = /https?\:\/\/w?w?w?\.?[0-9a-z-A-Z\-\.\_\~\:\/\?\#\[\]\@\!\$\&\'\(\)\*\+\,\;\=]{1,}\#?/;
+  return regex.test(str);
 };
 
 const userSchema = new mongoose.Schema({
@@ -28,6 +34,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
     required: false,
+    validate: {
+      validator: linkValidator, // валидация ссылки через regexp
+    },
   },
   email: {
     type: String,
