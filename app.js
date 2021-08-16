@@ -1,6 +1,6 @@
 /* eslint-disable import/order */
 // включает основную логику сервера, запуск и подключение к базе данных;
-
+require('dotenv').config(); // подключаем модуль dotenv, чтобы файл env был доступен в проекте в process.env
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
@@ -13,10 +13,11 @@ const auth = require('./middlewares/auth');
 const { PORT = 3000 } = process.env;
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const { isCelebrateError } = require('celebrate');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 const errorRouter = require('./routes/error');
-const sendError = require('./middlewares/sendError');
+const IncorrectDataError = require('./middlewares/Errors/IncorrectDataError');
 
 // import controllers
 const {
@@ -59,7 +60,6 @@ app.post('/signin', validateRequestOfregisterAndLogin(), login);
 app.post('/signup', validateRequestOfregisterAndLogin(), postUser);
 
 // проверка заголовка запроса на наличие токена и защита роутов мидлварой авторизации по токену
-// app.use(validateRequestToken, auth);
 app.use(auth);
 
 // роут users
@@ -71,9 +71,22 @@ app.use('/cards', cardsRouter);
 // роут 404
 app.use('*', errorRouter);
 
+// обработчик ошибок celebrate
+app.use((error, req, res, next) => {
+  if (isCelebrateError(error)) {
+    next(new IncorrectDataError('Переданы некорректные данные.'));
+  }
+  next(error);
+});
+
 // централизованный обработчик ошибок
 // eslint-disable-next-line no-unused-vars
-app.use((error, req, res, next) => sendError(error, res));
+app.use((error, req, res, next) => {
+  const { statusCode = 500, message } = error;
+  res.status(statusCode).send({
+    message: statusCode === 500 ? 'На сервере произошла ошибка' : message,
+  });
+});
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console

@@ -1,12 +1,3 @@
-// существует ли юзер
-function doesUserExist(req, res, next) {
-  const { userId } = req.params;
-  if (userId === 'err') { // потом написать более нормальную проверку по базе на основе регулярных выражений
-    res.status(404).send({ message: 'Пользователь по указанному id не найден' });
-  }
-  next();
-}
-
 // отключение кеширования
 function setNoCacheHeaders(req, res, next) {
   res.header('Cache-Control', 'no-store');
@@ -36,7 +27,6 @@ function setCors(req, res, next) {
 }
 
 module.exports = {
-  doesUserExist,
   setNoCacheHeaders,
   setCors,
 };

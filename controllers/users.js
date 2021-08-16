@@ -3,7 +3,11 @@ const bcrypt = require('bcryptjs');
 
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const ErrorConstructor = require('../middlewares/ErrorConstructor');
+const ConflictError = require('../middlewares/Errors/ConflictError');
+const NotFoundError = require('../middlewares/Errors/NotFoundError');
+const IncorrectDataError = require('../middlewares/Errors/IncorrectDataError');
+
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 function getUsers(req, res, next) {
   User.find({})
@@ -27,7 +31,7 @@ function getUsers(req, res, next) {
 function getUser(req, res, next) {
   const { userId } = req.params;
   User.findById(userId)
-    .orFail(new ErrorConstructor('notValidId')) // отлавливаем ошибку с null значением
+    .orFail(new NotFoundError('Карточка или пользователь не найдены')) // отлавливаем ошибку с null значением
     .then((user) => {
       const {
         name, about, avatar, _id,
@@ -68,11 +72,18 @@ function postUser(req, res, next) {
         _id,
       });
     })
-    .catch((error) => next(error));
+    .catch((error) => {
+      if (error.name === 'MongoError' && error.code === 11000) { // регистрация по уже существующему email
+        next(new ConflictError('Данный пользователь уже зарегистрирован'));
+      } else if (error.name === 'ValidationError' || error.name === 'CastError') { // ошибки валидации схемы
+        next(new IncorrectDataError('Переданы некорректные данные.'));
+      }
+      next(error);
+    });
 }
 
 function updateUser(req, res, next) {
-  const { _id } = req.user; // захардкоженый id юзера
+  const { _id } = req.user;
   const { name, about } = req.body;
   User.findByIdAndUpdate(
     _id,
@@ -86,7 +97,7 @@ function updateUser(req, res, next) {
       upsert: false, // если пользователь не найден, он будет создан
     },
   )
-    .orFail(new ErrorConstructor('notValidId')) // отлавливаем ошибку с null значением
+    .orFail(new NotFoundError('Карточка или пользователь не найдены')) // отлавливаем ошибку с null значением
     .then((updatedUser) => {
       const {
         // eslint-disable-next-line no-shadow
@@ -99,7 +110,12 @@ function updateUser(req, res, next) {
         _id,
       });
     })
-    .catch((error) => next(error));
+    .catch((error) => {
+      if (error.name === 'ValidationError' || error.name === 'CastError') { // ошибки валидации схемы
+        next(new IncorrectDataError('Переданы некорректные данные.'));
+      }
+      next(error);
+    });
 }
 
 function updateAvatar(req, res, next) {
@@ -116,7 +132,7 @@ function updateAvatar(req, res, next) {
       upsert: false, // если пользователь не найден, он будет создан
     },
   )
-    .orFail(new ErrorConstructor('notValidId')) // отлавливаем ошибку с null значением
+    .orFail(new NotFoundError('Карточка или пользователь не найдены')) // отлавливаем ошибку с null значением
     .then((updatedAvatar) => {
       const {
         // eslint-disable-next-line no-shadow
@@ -127,7 +143,12 @@ function updateAvatar(req, res, next) {
         _id,
       });
     })
-    .catch((error) => next(error));
+    .catch((error) => {
+      if (error.name === 'ValidationError' || error.name === 'CastError') { // ошибки валидации схемы
+        next(new IncorrectDataError('Переданы некорректные данные.'));
+      }
+      next(error);
+    });
 }
 
 // аутентификация (логин)
@@ -139,7 +160,8 @@ function login(req, res, next) {
       // создаем и отправляем пользователю токен
       const token = jwt.sign(
         { _id: user._id }, // то, что шифруем
-        'some-secret-key', // подпись секретного ключа для шифрования
+        // 'some-secret-key',
+        NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key', // подпись секретного ключа для шифрования из переменной окружения или по умолч
         { expiresIn: '7d' }, // опции : токен будет просрочен через 7 дней
       );
       // res.send({ token });
@@ -152,12 +174,17 @@ function login(req, res, next) {
         message: 'Токен записан в cookie',
       }));
     })
-    .catch((error) => next(error));
+    .catch((error) => {
+      if (error.name === 'ValidationError' || error.name === 'CastError') { // ошибки валидации схемы
+        next(new IncorrectDataError('Переданы некорректные данные.'));
+      }
+      next(error);
+    });
 }
 
 function getUserContent(req, res, next) {
   User.findById(req.user)
-    .orFail(new ErrorConstructor('notValidId')) // отлавливаем ошибку с null значением
+    .orFail(new NotFoundError('Карточка или пользователь не найдены')) // отлавливаем ошибку с null значением
     .then((user) => {
       const {
         _id, email,
@@ -167,7 +194,12 @@ function getUserContent(req, res, next) {
         email,
       });
     })
-    .catch((error) => next(error));
+    .catch((error) => {
+      if (error.name === 'ValidationError' || error.name === 'CastError') { // ошибки валидации схемы
+        next(new IncorrectDataError('Переданы некорректные данные.'));
+      }
+      next(error);
+    });
 }
 
 module.exports = {

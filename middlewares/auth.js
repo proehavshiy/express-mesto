@@ -1,5 +1,8 @@
 const jwt = require('jsonwebtoken');
-const ErrorConstructor = require('./ErrorConstructor');
+
+const UnauthorizedError = require('./Errors/UnauthorizedError');
+
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 // eslint-disable-next-line consistent-return
 // auth token from cookie
@@ -7,15 +10,16 @@ function authByToken(req, res, next) {
   const { token } = req.cookies; // извлекаем заголовок с токеном из кук
   // если нет токена
   if (!token) {
-    next(new ErrorConstructor('needAuth'));
+    next(new UnauthorizedError('Необходима авторизация'));
   }
   // верифицируем токен от пользователя (раскодируем)
   // Чтобы обработать ошибку, нужно обернуть в try catch
   let payload;
   try {
-    payload = jwt.verify(token, 'some-secret-key');
+    // payload = jwt.verify(token, 'some-secret-key');
+    payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key');
   } catch (err) {
-    next(new ErrorConstructor('needAuth'));
+    next(new UnauthorizedError('Необходима авторизация'));
   }
   // eslint-disable-next-line max-len
   req.user = payload; // записываем пейлоуд в объект запроса, чтобы подхватить его в следующем мидлваре

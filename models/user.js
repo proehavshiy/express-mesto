@@ -2,7 +2,7 @@
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const validator = require('validator');
-const ErrorConstructor = require('../middlewares/ErrorConstructor');
+const UnauthorizedError = require('../middlewares/Errors/UnauthorizedError');
 
 const emailValidator = function emailValidator(str) {
   return validator.isEmail(str, {
@@ -10,10 +10,11 @@ const emailValidator = function emailValidator(str) {
   });
 };
 
-const linkValidator = function linkValidator(str) {
-  const regex = /https?\:\/\/w?w?w?\.?[0-9a-z-A-Z\-\.\_\~\:\/\?\#\[\]\@\!\$\&\'\(\)\*\+\,\;\=]{1,}\#?/;
-  return regex.test(str);
-};
+// const linkValidator = function linkValidator(str) {
+// eslint-disable-next-line max-len
+//   const regex = /https?:\/\/(www\.)?[-a-zA-Z0-9-.]{2,}\.[a-z]{2,3}\b([0-9a-z-A-Z\-\.\_\~\:\/\?\#\[\]\@\!\$\&\'\(\)\*\+\,\;\=]*)\#?/;
+//   return regex.test(str);
+// };
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -35,7 +36,10 @@ const userSchema = new mongoose.Schema({
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
     required: false,
     validate: {
-      validator: linkValidator, // валидация ссылки через regexp
+      validator(link) {
+        return validator.isURL(link);
+      },
+      // validator: linkValidator, // валидация ссылки через regexp
     },
   },
   email: {
@@ -63,14 +67,16 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(email,
     .then((user) => {
       // если пользователя по емейлу нет
       if (!user) {
-        return Promise.reject(new ErrorConstructor('invalidPasswordOrEmail'));
+        // return Promise.reject(new ErrorConstructor('invalidPasswordOrEmail'));
+        return Promise.reject(new UnauthorizedError('Некорректный емейл или пароль'));
       }
       // если пользователь нашелся в базе
       // сравниваем переданный пароль и хеш из базы
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new ErrorConstructor('invalidPasswordOrEmail'));
+            // return Promise.reject(new ErrorConstructor('invalidPasswordOrEmail'));
+            return Promise.reject(new UnauthorizedError('Некорректный емейл или пароль'));
           }
           // возвращаем юзера, если все проверки удачны
           return user;

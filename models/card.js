@@ -1,11 +1,12 @@
 /* eslint-disable no-useless-escape */
 const mongoose = require('mongoose');
-const { ObjectId } = require('mongoose/lib/drivers/node-mongodb-native');
+const validator = require('validator');
 
-const linkValidator = function linkValidator(str) {
-  const regex = /https?\:\/\/w?w?w?\.?[0-9a-z-A-Z\-\.\_\~\:\/\?\#\[\]\@\!\$\&\'\(\)\*\+\,\;\=]{1,}\#?/;
-  return regex.test(str);
-};
+// const linkValidator = function linkValidator(str) {
+// eslint-disable-next-line max-len
+//   const regex = /https?:\/\/(www\.)?[-a-zA-Z0-9-.]{2,}\.[a-z]{2,3}\b([0-9a-z-A-Z\-\.\_\~\:\/\?\#\[\]\@\!\$\&\'\(\)\*\+\,\;\=]*)\#?/;
+//   return regex.test(str);
+// };
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -18,15 +19,20 @@ const cardSchema = new mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator: linkValidator, // валидация ссылки через модуль валидатор
+      validator(link) {
+        return validator.isURL(link);
+      },
+      // validator: linkValidator, // валидация ссылки через модуль валидатор
     },
   },
   owner: {
-    type: ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'user',
     required: true,
   },
   likes: [{
-    type: ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'user',
     default: [],
   }],
   createdAt: {

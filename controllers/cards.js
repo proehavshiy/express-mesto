@@ -1,6 +1,8 @@
 /* eslint-disable no-param-reassign */
 const Card = require('../models/card');
-const ErrorConstructor = require('../middlewares/ErrorConstructor');
+const NotFoundError = require('../middlewares/Errors/NotFoundError');
+const IncorrectDataError = require('../middlewares/Errors/IncorrectDataError');
+const ForbiddenError = require('../middlewares/Errors/ForbiddenError');
 
 function getCards(req, res, next) {
   Card.find({})
@@ -38,7 +40,12 @@ function postCards(req, res, next) {
         owner,
       });
     })
-    .catch((error) => next(error));
+    .catch((error) => {
+      if (error.name === 'ValidationError' || error.name === 'CastError') { // ошибки валидации схемы
+        next(new IncorrectDataError('Переданы некорректные данные.'));
+      }
+      next(error);
+    });
 }
 
 function deleteCardById(req, res, next) {
@@ -46,14 +53,15 @@ function deleteCardById(req, res, next) {
   const userId = req.user._id;
   // ищем карточку и сравниваем id пользователя с id владельца
   Card.findById(cardId)
-    .orFail(new ErrorConstructor('notValidId')) // отлавливаем ошибку с null значением, если такой карточки нет
+    .orFail(new NotFoundError('Карточка или пользователь не найдены')) // отлавливаем ошибку с null значением
     .then((card) => {
       if (userId !== card.owner.toString()) {
-        throw new ErrorConstructor('notMyCard'); // ошибка удаления чужой карточки
+        // throw new ErrorConstructor('notMyCard'); // ошибка удаления чужой карточки
+        throw new ForbiddenError('Удаление чужой карточки невозможно'); // ошибка удаления чужой карточки
       } else {
         // если пользователь и владелец совпадают, удаляем карточку
         Card.findByIdAndRemove(cardId)
-          .orFail(new ErrorConstructor('notValidId')) // отлавливаем ошибку с null значением, если такой карточки нет
+          .orFail(new NotFoundError('Карточка или пользователь не найдены')) // отлавливаем ошибку с null значением
           .then((deletedCard) => {
             res.send({
               message: `Карточка ${deletedCard._id} успешно удалена`,
@@ -61,7 +69,12 @@ function deleteCardById(req, res, next) {
           });
       }
     })
-    .catch((error) => next(error));
+    .catch((error) => {
+      if (error.name === 'ValidationError' || error.name === 'CastError') { // ошибки валидации схемы
+        next(new IncorrectDataError('Переданы некорректные данные.'));
+      }
+      next(error);
+    });
 }
 
 function putCardLike(req, res, next) {
@@ -78,7 +91,7 @@ function putCardLike(req, res, next) {
       upsert: false, // если пользователь не найден, он будет создан
     },
   )
-    .orFail(new ErrorConstructor('notValidId')) // отлавливаем ошибку с null значением
+    .orFail(new NotFoundError('Карточка или пользователь не найдены')) // отлавливаем ошибку с null значением
     .then((likedCard) => {
       const {
         // eslint-disable-next-line no-shadow
@@ -92,7 +105,12 @@ function putCardLike(req, res, next) {
         owner,
       });
     })
-    .catch((error) => next(error));
+    .catch((error) => {
+      if (error.name === 'ValidationError' || error.name === 'CastError') { // ошибки валидации схемы
+        next(new IncorrectDataError('Переданы некорректные данные.'));
+      }
+      next(error);
+    });
 }
 
 function deleteCardLike(req, res, next) {
@@ -109,7 +127,7 @@ function deleteCardLike(req, res, next) {
       upsert: false, // если пользователь не найден, он будет создан
     },
   )
-    .orFail(new ErrorConstructor('notValidId')) // отлавливаем ошибку с null значением
+    .orFail(new NotFoundError('Карточка или пользователь не найдены')) // отлавливаем ошибку с null значением
     .then((unlikedCard) => {
       const {
         // eslint-disable-next-line no-shadow
@@ -123,7 +141,12 @@ function deleteCardLike(req, res, next) {
         owner,
       });
     })
-    .catch((error) => next(error));
+    .catch((error) => {
+      if (error.name === 'ValidationError' || error.name === 'CastError') { // ошибки валидации схемы
+        next(new IncorrectDataError('Переданы некорректные данные.'));
+      }
+      next(error);
+    });
 }
 
 module.exports = {
