@@ -26,7 +26,7 @@ function validateRequestOfUpdateUser() {
 function validateRequestOfUpdateAvatar() {
   return celebrate({
     body: Joi.object().keys({
-      avatar: Joi.string().required().min(5),
+      avatar: Joi.string().pattern(/https?:\/\/(www\.)?[-a-zA-Z0-9-.]{2,}\.[a-z]{2,3}\b([0-9a-z-A-Z\-\.\_\~\:\/\?\#\[\]\@\!\$\&\'\(\)\*\+\,\;\=]*)\#?/),
     }),
   });
 }
