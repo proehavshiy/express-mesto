@@ -18,6 +18,7 @@ const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 const errorRouter = require('./routes/error');
 const IncorrectDataError = require('./middlewares/Errors/IncorrectDataError');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 // import controllers
 const {
@@ -55,6 +56,9 @@ app.use(bodyParser.json());
 // подключаем парсер кук как мидлвэр
 app.use(cookieParser());
 
+// логгер запросов
+app.use(requestLogger);
+
 // роуты, не требующие авторизации
 app.post('/signin', validateRequestOfregisterAndLogin(), login);
 app.post('/signup', validateRequestOfregisterAndLogin(), postUser);
@@ -70,6 +74,9 @@ app.use('/cards', cardsRouter);
 
 // роут 404
 app.use('*', errorRouter);
+
+// логгер ошибок
+app.use(errorLogger);
 
 // обработчик ошибок celebrate
 app.use((error, req, res, next) => {
