@@ -11,7 +11,9 @@ function setNoCacheHeaders(req, res, next) {
 // Массив разешённых доменов
 const allowedCors = [
   'localhost:3000',
-  'front.mesto15.nomoredomains.club',
+  'http://front.mesto15.nomoredomains.club',
+  'https://front.mesto15.nomoredomains.club',
+  'http://localhost:3000/react-mesto-auth',
 ];
 
 // eslint-disable-next-line consistent-return
