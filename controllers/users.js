@@ -168,8 +168,8 @@ function login(req, res, next) {
       // передача токена через cookie
       res.cookie('token', token, {
         maxAge: 3600000 * 24 * 7,
-        httpOnly: true,
-        sameSite: true,
+        //httpOnly: true, //ПОТОМ ВКЛЮЧИТЬ
+        //sameSite: true, //ПОТОМ ВКЛЮЧИТЬ
       }).end(res.send({
         message: 'Токен записан в cookie',
       }));
