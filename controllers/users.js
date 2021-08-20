@@ -202,6 +202,16 @@ function getUserContent(req, res, next) {
     });
 }
 
+// разлогиневаемся
+function logOut(req, res, next) {
+  res
+    .clearCookie('token')
+    .send({
+      message: 'вы успешно разлогинены',
+    });
+  next();
+}
+
 module.exports = {
   getUsers,
   getUser,
@@ -210,4 +220,5 @@ module.exports = {
   updateAvatar,
   login,
   getUserContent,
+  logOut,
 };

@@ -1,6 +1,7 @@
 /* eslint-disable import/order */
 // включает основную логику сервера, запуск и подключение к базе данных;
 require('dotenv').config(); // подключаем модуль dotenv, чтобы файл env был доступен в проекте в process.env
+// eslint-disable-next-line import/no-unresolved
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
@@ -11,6 +12,7 @@ const { validateRequestOfregisterAndLogin } = require('./middlewares/requestVali
 const auth = require('./middlewares/auth');
 
 const { PORT = 3000 } = process.env;
+// eslint-disable-next-line import/no-unresolved
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const { isCelebrateError } = require('celebrate');
@@ -24,6 +26,7 @@ const { requestLogger, errorLogger } = require('./middlewares/logger');
 const {
   postUser,
   login,
+  logOut,
 } = require('./controllers/users');
 
 const app = express();
@@ -62,6 +65,7 @@ app.use(requestLogger);
 // роуты, не требующие авторизации
 app.post('/signin', validateRequestOfregisterAndLogin(), login);
 app.post('/signup', validateRequestOfregisterAndLogin(), postUser);
+app.delete('/logout', logOut);
 
 // проверка заголовка запроса на наличие токена и защита роутов мидлварой авторизации по токену
 app.use(auth);
