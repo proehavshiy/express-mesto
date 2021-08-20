@@ -63,8 +63,16 @@ function deleteCardById(req, res, next) {
         Card.findByIdAndRemove(cardId)
           .orFail(new NotFoundError('Карточка или пользователь не найдены')) // отлавливаем ошибку с null значением
           .then((deletedCard) => {
+            const {
+              // eslint-disable-next-line no-shadow
+              likes, name, link, _id, owner,
+            } = deletedCard;
             res.send({
-              message: `Карточка ${deletedCard._id} успешно удалена`,
+              likes,
+              name,
+              link,
+              _id,
+              owner,
             });
           });
       }

@@ -34,12 +34,13 @@ function getUser(req, res, next) {
     .orFail(new NotFoundError('Карточка или пользователь не найдены')) // отлавливаем ошибку с null значением
     .then((user) => {
       const {
-        name, about, avatar, _id,
+        name, about, email, avatar, _id,
       } = user;
       res.send({
         name,
         about,
         avatar,
+        email,
         _id,
       });
     })
@@ -62,7 +63,7 @@ function postUser(req, res, next) {
     .then((user) => {
       const {
         // eslint-disable-next-line no-shadow
-        name, about, avatar, _id,
+        name, about, email, avatar, _id,
       } = user;
       res.status(201).send({
         name,
@@ -101,12 +102,13 @@ function updateUser(req, res, next) {
     .then((updatedUser) => {
       const {
         // eslint-disable-next-line no-shadow
-        name, about, avatar, _id,
+        name, about, email, avatar, _id,
       } = updatedUser;
       res.send({
         name,
         about,
         avatar,
+        email,
         _id,
       });
     })
@@ -136,10 +138,13 @@ function updateAvatar(req, res, next) {
     .then((updatedAvatar) => {
       const {
         // eslint-disable-next-line no-shadow
-        avatar, _id,
+        about, avatar, email, name, _id,
       } = updatedAvatar;
       res.send({
+        name,
+        about,
         avatar,
+        email,
         _id,
       });
     })
@@ -168,8 +173,8 @@ function login(req, res, next) {
       // передача токена через cookie
       res.cookie('token', token, {
         maxAge: 3600000 * 24 * 7,
-        //httpOnly: true, //ПОТОМ ВКЛЮЧИТЬ
-        //sameSite: true, //ПОТОМ ВКЛЮЧИТЬ
+        httpOnly: true,
+        sameSite: true,
       }).end(res.send({
         message: 'Токен записан в cookie',
       }));
@@ -187,11 +192,14 @@ function getUserContent(req, res, next) {
     .orFail(new NotFoundError('Карточка или пользователь не найдены')) // отлавливаем ошибку с null значением
     .then((user) => {
       const {
-        _id, email,
+        name, about, avatar, _id, email,
       } = user;
       res.send({
-        _id,
+        name,
+        about,
+        avatar,
         email,
+        _id,
       });
     })
     .catch((error) => {
