@@ -13,7 +13,9 @@ const allowedCors = [
   'localhost:3000',
   'http://front.mesto15.nomoredomains.club',
   'https://front.mesto15.nomoredomains.club',
-  'http://localhost:3000/react-mesto-auth',
+  'http://api.mesto15.nomoredomains.club',
+  'https://api.mesto15.nomoredomains.club',
+  'http://localhost:3000',
 ];
 
 // eslint-disable-next-line consistent-return
@@ -26,6 +28,7 @@ function setCors(req, res, next) {
   // Проверяем, что значение origin есть среди разрешённых доменов
   if (allowedCors.includes(origin)) {
     res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
   }
 
   // Если это предварительный запрос, добавляем нужные заголовки
